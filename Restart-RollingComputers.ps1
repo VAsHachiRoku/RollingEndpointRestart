@@ -1,18 +1,26 @@
+#https://github.com/VAsHachiRoku/RollingEndpointRestart
+#
 #Prompt for credentials to restart endpoints
 $credentials = (Get-Credential)
+
 #Array String of endpoints to control the exact order endpoints should be restarted
 $Computers = "EndPnt01", "EndPnt01"
+
 #Initalize the log file with Month, Day, Year, Hour and Minute format per script execution
 $LogName = Get-Date -Format "MMddyyyy_HHmm"
+
 #Intialize Counter for Write-Progress bar -Status message
 $Counter = 1
+
 #foreach loop, with Try and Catch statements
 foreach ($Computer in $Computers) {
     try {
         #Write the progress of current endpoint being rebooted and its number in the queue
         Write-Progress -Activity 'Rolling Reboot of Endpoints' -Status "Currently Reboot Endpoint: $Computer which is $Counter out of $($Computers.Count)" -PercentComplete ((($Counter++) / $Computers.Count) * 100)
+        
         #Restart the endpoint and wait for endpoint online verification, with a 5 minute timeout
         Restart-Computer -ComputerName $Computer -Wait -For PowerShell -Timeout 300 -Delay 5 -Force -Credential $credentials -ErrorAction Stop
+        
         #Endpoint Successfully rebooted append to log file
         Add-Content -Path ".\SuccessfullyRebooted_$Logname.txt" -Value $Computer
     }
